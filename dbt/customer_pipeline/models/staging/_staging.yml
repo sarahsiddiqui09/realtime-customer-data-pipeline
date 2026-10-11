@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'CUSTOMER_PIPELINE') }}"
+    schema: RAW
+    tables:
+      - name: customers_raw
+        description: Raw Kafka messages from the customers Debezium topic (one row per change event).
+        loaded_at_field: record_metadata:CreateTime::timestamp_ntz
+        freshness:
+          warn_after: {count: 30, period: minute}
+          error_after: {count: 2, period: hour}
+      - name: transactions_raw
+        description: Raw Kafka messages from the transactions Debezium topic.
+        loaded_at_field: record_metadata:CreateTime::timestamp_ntz
+        freshness:
+          warn_after: {count: 30, period: minute}
+          error_after: {count: 2, period: hour}
+
+models:
+  - name: stg_customers
+    description: One row per customer, deduped to the latest Kafka offset.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: email
+        tests: [not_null]
+
+  - name: stg_transactions
+    description: One row per transaction, deduped to the latest Kafka offset.
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['pending', 'completed', 'failed']
+      - name: transaction_type
+        tests:
+          - accepted_values:
+              values: ['purchase', 'refund', 'subscription']

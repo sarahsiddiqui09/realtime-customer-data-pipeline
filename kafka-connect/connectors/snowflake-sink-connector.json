@@ -1,0 +1,24 @@
+{
+  "name": "snowflake-customer-sink",
+  "config": {
+    "connector.class": "com.snowflake.kafka.connector.SnowflakeSinkConnector",
+    "tasks.max": "2",
+    "topics": "pg_customer_db.public.customers,pg_customer_db.public.transactions",
+    "snowflake.topic2table.map": "pg_customer_db.public.customers:customers_raw,pg_customer_db.public.transactions:transactions_raw",
+    "snowflake.url.name": "${SNOWFLAKE_ACCOUNT}.snowflakecomputing.com",
+    "snowflake.user.name": "${SNOWFLAKE_USER}",
+    "snowflake.private.key": "${SNOWFLAKE_PRIVATE_KEY}",
+    "snowflake.private.key.passphrase": "${SNOWFLAKE_PRIVATE_KEY_PASSPHRASE}",
+    "snowflake.role.name": "${SNOWFLAKE_ROLE}",
+    "snowflake.database.name": "${SNOWFLAKE_DATABASE}",
+    "snowflake.schema.name": "${SNOWFLAKE_RAW_SCHEMA}",
+    "buffer.count.records": "1000",
+    "buffer.flush.time": "30",
+    "buffer.size.bytes": "5000000",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "com.snowflake.kafka.connector.records.SnowflakeJsonConverter",
+    "errors.tolerance": "all",
+    "errors.deadletterqueue.topic.name": "snowflake-sink-dlq",
+    "errors.deadletterqueue.context.headers.enable": "true"
+  }
+}

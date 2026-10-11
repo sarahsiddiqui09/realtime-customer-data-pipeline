@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: One row per customer. Grain = customer_id.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: email
+        tests: [unique, not_null]
+
+  - name: fct_transactions
+    description: One row per transaction. Grain = transaction_id.
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['pending', 'completed', 'failed']
+
+  - name: customer_transaction_summary
+    description: One row per customer, aggregated across completed transactions.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: customer_status
+        tests:
+          - accepted_values:
+              values: ['active', 'at_risk', 'dormant', 'never_transacted']

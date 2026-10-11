@@ -1,0 +1,8 @@
+.env
+snowflake/rsa_key.p8
+snowflake/rsa_key.pub
+dbt/customer_pipeline/target/
+dbt/customer_pipeline/dbt_packages/
+dbt/customer_pipeline/logs/
+__pycache__/
+*.pyc
