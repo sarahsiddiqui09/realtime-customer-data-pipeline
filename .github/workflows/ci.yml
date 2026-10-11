@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pyyaml
+      - name: Validate JSON connector configs
+        run: for f in kafka-connect/connectors/*.json; do python -m json.tool "$f" > /dev/null; done
+      - name: Validate YAML
+        run: python -c "import yaml,glob; [yaml.safe_load(open(f)) for f in ['docker-compose.yml']+glob.glob('dbt/**/*.yml', recursive=True)]"
+      - name: Compile Python
+        run: python -m py_compile producer/generate_data.py
